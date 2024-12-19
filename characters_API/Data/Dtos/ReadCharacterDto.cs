@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace characters_API.Data.Dtos
+namespace characters_API.Data.Dtos;
 
 public class ReadCharacterDto
 {

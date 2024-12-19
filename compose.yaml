@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16.4
+    container_name: postgres
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+    networks:
+      - characters-api-bridge
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  characters_api:
+    build:
+      context: ./characters_API
+      dockerfile: Dockerfile
+    container_name: characters_api
+    ports:
+      - "5281:5281"
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    networks:
+      - characters-api-bridge
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:5281 || exit 1" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+networks:
+  characters-api-bridge:
+    driver: bridge
+
+volumes:
+  postgres-data:
