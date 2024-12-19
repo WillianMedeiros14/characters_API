@@ -16,9 +16,6 @@ public class CharacterController : ControllerBase
     private CharacterContext _context;
     private IMapper _mapper;
 
-
-
-
     public CharacterController(CharacterContext context, IMapper mapper)
     {
         _context = context;
@@ -26,7 +23,7 @@ public class CharacterController : ControllerBase
     }
 
     /// <summary>
-    /// Adiciona um produto ao banco de dados
+    /// Adiciona um personagem ao banco de dados
     /// </summary>
     /// <param name="characterDto">Objeto com os campos necessários para criação de um personagem</param>
     /// <returns>IActionResult</returns>
