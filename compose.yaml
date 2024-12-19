@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     container_name: characters_api
     ports:
-      - "5281:5281"
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
