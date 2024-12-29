@@ -42,7 +42,7 @@ As principais tecnologias e bibliotecas utilizadas no projeto incluem:
 
    ```bash
    git clone https://github.com/WillianMedeiros14/characters_API.git
-   git checkout v1-CRUD
+   git checkout main
    ```
 
 ---
