@@ -5,6 +5,7 @@ using AutoMapper.QueryableExtensions;
 using characters_API.Data;
 using characters_API.Data.Dtos;
 using characters_API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace characters_API.Controllers;
@@ -30,6 +31,7 @@ public class CharacterController : ControllerBase
     /// <response code="201">Caso inserção seja feita com sucesso</response>
 
     [HttpPost]
+    // [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public IActionResult AddCharacter([FromBody] CreateCharacterDto characterDto)
     {
@@ -49,6 +51,7 @@ public class CharacterController : ControllerBase
     /// <response code="200">Caso encontre os personagens</response>
 
     [HttpGet]
+    [Authorize]
     public IEnumerable<ReadCharacterDto> GetAllCharacters([FromQuery] int skip = 0, [FromQuery] int take = 50)
     {
         return _context.Characters

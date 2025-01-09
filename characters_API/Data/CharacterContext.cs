@@ -2,10 +2,11 @@
 
 using characters_API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace characters_API.Data;
 
-public class CharacterContext : DbContext
+public class CharacterContext : IdentityDbContext<UserModel>
 {
     public CharacterContext(DbContextOptions<CharacterContext> opts) : base(opts)
     {
@@ -14,7 +15,7 @@ public class CharacterContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
+        base.OnModelCreating(modelBuilder);
 
     }
 
