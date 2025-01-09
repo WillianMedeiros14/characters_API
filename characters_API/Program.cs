@@ -72,7 +72,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-var key = Encoding.ASCII.GetBytes(Key.Secret);
+var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key.Secret));
 
 
 builder.Services.AddAuthentication(options =>
@@ -84,7 +84,7 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
+        IssuerSigningKey = key,
         ValidateAudience = false,
         ValidateIssuer = false,
         ClockSkew = TimeSpan.Zero

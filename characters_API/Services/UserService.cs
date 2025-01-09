@@ -1,11 +1,7 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using characters_API.Data.Dtos;
 using characters_API.Models;
-using characters_API.Services;
 
 namespace characters_API.Services
 {
@@ -24,13 +20,13 @@ namespace characters_API.Services
             _tokenService = tokenService;
         }
 
-        public async Task CadastraUsuario(CreateUserDto dto)
+        public async Task SignUp(CreateUserDto dto)
         {
-            UserModel usuario = _mapper.Map<UserModel>(dto);
+            UserModel user = _mapper.Map<UserModel>(dto);
 
-            IdentityResult resultado = await _userManager.CreateAsync(usuario, dto.Password);
+            IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
 
-            if (!resultado.Succeeded)
+            if (!result.Succeeded)
             {
                 throw new ApplicationException("Falha ao cadastrar usuário!");
             }
@@ -38,9 +34,9 @@ namespace characters_API.Services
 
         public async Task<string> Login(LoginUserDto dto)
         {
-            var resultado = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
+            var result = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
 
-            if (!resultado.Succeeded)
+            if (!result.Succeeded)
             {
                 throw new ApplicationException("Usuário não autenticado!");
             }
@@ -48,7 +44,7 @@ namespace characters_API.Services
             var user = _signInManager
                 .UserManager
                 .Users
-                .FirstOrDefault(user => user.NormalizedEmail == dto.Email.ToUpper());
+                .FirstOrDefault(user => user.NormalizedUserName == dto.Username.ToUpper());
 
             var token = _tokenService.GenerateToken(user);
 

@@ -31,7 +31,7 @@ public class CharacterController : ControllerBase
     /// <response code="201">Caso inserção seja feita com sucesso</response>
 
     [HttpPost]
-    // [Authorize]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
     public IActionResult AddCharacter([FromBody] CreateCharacterDto characterDto)
     {

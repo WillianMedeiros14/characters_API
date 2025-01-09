@@ -13,13 +13,12 @@ namespace characters_API.Services
         {
             Claim[] claims = new Claim[]
             {
-                new Claim("username", user.UserName),
-                new Claim("id", user.Id.ToString())
+                new Claim(ClaimTypes.Name, user.UserName),
             };
 
-            var chave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key.Secret));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key.Secret));
 
-            var signingCredentials = new SigningCredentials(chave, SecurityAlgorithms.HmacSha256);
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken
                 (
