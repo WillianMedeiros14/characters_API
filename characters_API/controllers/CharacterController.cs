@@ -6,7 +6,7 @@ using characters_API.Data;
 using characters_API.Data.Dtos;
 using characters_API.Models;
 using Microsoft.AspNetCore.Authorization;
-
+using characters_API.Services;
 
 namespace characters_API.Controllers;
 
@@ -17,10 +17,13 @@ public class CharacterController : ControllerBase
     private CharacterContext _context;
     private IMapper _mapper;
 
-    public CharacterController(CharacterContext context, IMapper mapper)
+    private UserService _userService;
+
+    public CharacterController(CharacterContext context, IMapper mapper, UserService userService)
     {
         _context = context;
         _mapper = mapper;
+        _userService = userService;
     }
 
     /// <summary>
@@ -33,15 +36,22 @@ public class CharacterController : ControllerBase
     [HttpPost]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public IActionResult AddCharacter([FromBody] CreateCharacterDto characterDto)
+    public async Task<IActionResult> AddCharacterAsync([FromBody] CreateCharacterDto characterDto)
     {
+        var userName = User.Identity.Name;
 
+        var userId = await _userService.GetUserId(userName);
 
         CharacterModel character = _mapper.Map<CharacterModel>(characterDto);
+
+        character.UserId = userId;
+
         _context.Characters.Add(character);
         _context.SaveChanges();
 
-        return CreatedAtAction(nameof(GetCharacterById), new { id = character.Id }, character);
+        var characterResponseDto = _mapper.Map<ReadCharacterDto>(character);
+
+        return CreatedAtAction(nameof(GetCharacterByIdAsync), new { id = character.Id }, characterResponseDto);
     }
 
     /// <summary>
@@ -52,9 +62,15 @@ public class CharacterController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public IEnumerable<ReadCharacterDto> GetAllCharacters([FromQuery] int skip = 0, [FromQuery] int take = 50)
+    public async Task<IEnumerable<ReadCharacterDto>> GetAllCharactersAsync([FromQuery] int skip = 0, [FromQuery] int take = 50)
     {
+
+        var userName = User.Identity.Name;
+
+        var userId = await _userService.GetUserId(userName);
+
         return _context.Characters
+        .Where(c => c.UserId == userId)
             .OrderBy(p => p.Id)
             .Skip(skip)
             .Take(take)
@@ -71,12 +87,17 @@ public class CharacterController : ControllerBase
     /// <response code="404">Caso o personagem não seja encontrado</response>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ReadCharacterDto))]
-    public IActionResult GetCharacterById(int id)
+    public async Task<IActionResult> GetCharacterByIdAsync(int id)
     {
-        var product = _context.Characters.FirstOrDefault(product => product.Id == id);
-        if (product == null) return NotFound();
-        var productDto = _mapper.Map<ReadCharacterDto>(product);
-        return Ok(productDto);
+        var userName = User.Identity.Name;
+
+        var userId = await _userService.GetUserId(userName);
+
+        var character = _context.Characters.FirstOrDefault(c => c.Id == id && c.UserId == userId);
+
+        if (character == null) return NotFound();
+        var characterDto = _mapper.Map<ReadCharacterDto>(character);
+        return Ok(characterDto);
     }
 
     /// <summary>
@@ -90,11 +111,15 @@ public class CharacterController : ControllerBase
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult UpdateProduct(int id, [FromBody] UpdateCharacterDto updateCharacterDto)
+    public async Task<IActionResult> UpdateCharacterAsync(int id, [FromBody] UpdateCharacterDto updateCharacterDto)
     {
-        var product = _context.Characters.FirstOrDefault(product => product.Id == id);
-        if (product == null) return NotFound();
-        _mapper.Map(updateCharacterDto, product);
+        var userName = User.Identity.Name;
+
+        var userId = await _userService.GetUserId(userName);
+
+        var character = _context.Characters.FirstOrDefault(c => c.Id == id && c.UserId == userId);
+        if (character == null) return NotFound();
+        _mapper.Map(updateCharacterDto, character);
         _context.SaveChanges();
         return NoContent();
     }
@@ -109,11 +134,15 @@ public class CharacterController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult DeleteProduct(int id)
+    public async Task<IActionResult> DeleteCharacterAsync(int id)
     {
-        var product = _context.Characters.FirstOrDefault(product => product.Id == id);
-        if (product == null) return NotFound();
-        _context.Remove(product);
+        var userName = User.Identity.Name;
+
+        var userId = await _userService.GetUserId(userName);
+
+        var character = _context.Characters.FirstOrDefault(c => c.Id == id && c.UserId == userId);
+        if (character == null) return NotFound();
+        _context.Remove(character);
         _context.SaveChanges();
         return NoContent();
     }

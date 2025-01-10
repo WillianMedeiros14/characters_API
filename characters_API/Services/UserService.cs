@@ -63,5 +63,15 @@ namespace characters_API.Services
             };
         }
 
+        public async Task<string> GetUserId(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                throw new ApplicationException("Usuário não encontrado!");
+            }
+
+            return user.Id;
+        }
     }
 }
