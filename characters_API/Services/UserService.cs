@@ -31,23 +31,23 @@ namespace characters_API.Services
                 throw new ApplicationException("Falha ao cadastrar usuário!");
             }
 
-            return await Login(new LoginUserDto { Username = dto.Username, Password = dto.Password });
+            return await Login(new LoginUserDto { Email = dto.Email, Password = dto.Password });
 
         }
 
         public async Task<LoginResponseDto> Login(LoginUserDto dto)
         {
-            var result = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+            {
+                throw new ApplicationException("Usuário não encontrado!");
+            }
 
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, dto.Password, false, false);
             if (!result.Succeeded)
             {
                 throw new ApplicationException("Usuário não autenticado!");
             }
-
-            var user = _signInManager
-                .UserManager
-                .Users
-                .FirstOrDefault(user => user.NormalizedUserName == dto.Username.ToUpper());
 
             var token = _tokenService.GenerateToken(user);
 
@@ -61,7 +61,7 @@ namespace characters_API.Services
                     Email = user.Email
                 }
             };
-
         }
+
     }
 }
