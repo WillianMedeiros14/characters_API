@@ -20,7 +20,7 @@ namespace characters_API.Services
             _tokenService = tokenService;
         }
 
-        public async Task SignUp(CreateUserDto dto)
+        public async Task<LoginResponseDto> SignUp(CreateUserDto dto)
         {
             UserModel user = _mapper.Map<UserModel>(dto);
 
@@ -30,9 +30,12 @@ namespace characters_API.Services
             {
                 throw new ApplicationException("Falha ao cadastrar usuário!");
             }
+
+            return await Login(new LoginUserDto { Username = dto.Username, Password = dto.Password });
+
         }
 
-        public async Task<string> Login(LoginUserDto dto)
+        public async Task<LoginResponseDto> Login(LoginUserDto dto)
         {
             var result = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
 
@@ -48,7 +51,16 @@ namespace characters_API.Services
 
             var token = _tokenService.GenerateToken(user);
 
-            return token;
+            return new LoginResponseDto
+            {
+                Token = token,
+                User = new UserInfoDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email
+                }
+            };
 
         }
     }

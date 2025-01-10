@@ -20,8 +20,8 @@ namespace characters_API.Controllers
         public async Task<IActionResult> CreateUser
             (CreateUserDto dto)
         {
-            await _userService.SignUp(dto);
-            return Ok("Usuário cadastrado!");
+            var response = await _userService.SignUp(dto);
+            return Ok(response);
 
         }
 
