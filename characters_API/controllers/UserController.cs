@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using characters_API.Data.Dtos;
 using characters_API.Services;
 using characters_API.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace characters_API.Controllers
 {
@@ -28,8 +29,16 @@ namespace characters_API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync(LoginUserDto dto)
         {
-            var token = await _userService.Login(dto);
-            return Ok(token);
+            try
+            {
+                var token = await _userService.Login(dto);
+                return Ok(token);
+            }
+            catch (ApplicationException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
         }
+
     }
 }

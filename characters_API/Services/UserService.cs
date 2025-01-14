@@ -44,9 +44,10 @@ namespace characters_API.Services
             }
 
             var result = await _signInManager.PasswordSignInAsync(user.UserName, dto.Password, false, false);
+
             if (!result.Succeeded)
             {
-                throw new ApplicationException("Usuário não autenticado!");
+                throw new ApplicationException("Usuário ou senha incorretos!");
             }
 
             var token = _tokenService.GenerateToken(user);

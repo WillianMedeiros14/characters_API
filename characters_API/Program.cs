@@ -8,7 +8,7 @@ using characters_API.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-
+using Microsoft.AspNetCore.Mvc;
 using characters_API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,13 +21,16 @@ builder.Services.AddIdentity<UserModel, IdentityRole>()
     .AddEntityFrameworkStores<CharacterContext>()
     .AddDefaultTokenProviders();
 
-
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddExceptionHandler<BadRequestExceptionHandler>();
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -35,7 +38,6 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
 {
-
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Characters", Version = "v1" });
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -71,17 +73,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key.Secret));
-
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme =
-        JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = key,
@@ -90,6 +90,8 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TokenService>();
@@ -106,13 +108,38 @@ app.MapGet("/", () =>
 .WithName("/")
 .WithOpenApi();
 
+app.UseCors(policy =>
+         policy
+         .AllowAnyOrigin()
+         .AllowAnyHeader()
+         .AllowAnyMethod()
+         );
+
+app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
+
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.Response.StatusCode == 401)
+    {
+        var problemDetails = new ProblemDetails
+        {
+            Status = StatusCodes.Status401Unauthorized,
+            Title = "Unauthorized",
+            Detail = "O token fornecido expirou ou é inválido"
+        };
+        await context.Response.WriteAsJsonAsync(problemDetails);
+    }
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+builder.Services.AddLogging();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -120,7 +147,4 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 }
 
-
-
 app.Run();
-

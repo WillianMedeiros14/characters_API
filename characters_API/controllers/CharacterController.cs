@@ -7,7 +7,6 @@ using characters_API.Data.Dtos;
 using characters_API.Models;
 using Microsoft.AspNetCore.Authorization;
 using characters_API.Services;
-
 namespace characters_API.Controllers;
 
 [ApiController]
@@ -64,13 +63,12 @@ public class CharacterController : ControllerBase
     [Authorize]
     public async Task<IEnumerable<ReadCharacterDto>> GetAllCharactersAsync([FromQuery] int skip = 0, [FromQuery] int take = 50)
     {
-
         var userName = User.Identity.Name;
 
         var userId = await _userService.GetUserId(userName);
 
         return _context.Characters
-        .Where(c => c.UserId == userId)
+            .Where(p => p.UserId == userId)
             .OrderBy(p => p.Id)
             .Skip(skip)
             .Take(take)
@@ -86,6 +84,7 @@ public class CharacterController : ControllerBase
     /// <response code="200">Caso encontre os personagem</response>
     /// <response code="404">Caso o personagem não seja encontrado</response>
     [HttpGet("{id}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ReadCharacterDto))]
     public async Task<IActionResult> GetCharacterByIdAsync(int id)
     {
@@ -109,6 +108,7 @@ public class CharacterController : ControllerBase
     /// <response code="204">Caso atualização seja feita com sucesso</response>
     /// <response code="404">Caso o personagem não seja encontrado</response>
     [HttpPut("{id}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateCharacterAsync(int id, [FromBody] UpdateCharacterDto updateCharacterDto)
@@ -132,6 +132,7 @@ public class CharacterController : ControllerBase
     /// <response code="204">Caso deleção seja feita com sucesso</response>
     /// <response code="404">Caso o personagem não seja encontrado</response>
     [HttpDelete("{id}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCharacterAsync(int id)
@@ -146,5 +147,4 @@ public class CharacterController : ControllerBase
         _context.SaveChanges();
         return NoContent();
     }
-
 }
