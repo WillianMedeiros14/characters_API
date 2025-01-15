@@ -35,7 +35,7 @@ public class CharacterController : ControllerBase
     [HttpPost]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> AddCharacterAsync([FromBody] CreateCharacterDto characterDto)
+    public async Task<IResult> AddCharacterAsync([FromBody] CreateCharacterDto characterDto)
     {
         var userName = User.Identity.Name;
 
@@ -46,11 +46,12 @@ public class CharacterController : ControllerBase
         character.UserId = userId;
 
         _context.Characters.Add(character);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         var characterResponseDto = _mapper.Map<ReadCharacterDto>(character);
 
-        return CreatedAtAction(nameof(GetCharacterByIdAsync), new { id = character.Id }, characterResponseDto);
+        var location = Url.Action(nameof(AddCharacterAsync), new { id = character.Id });
+        return Results.Created(location, characterResponseDto);
     }
 
     /// <summary>
