@@ -23,5 +23,8 @@ public class CharacterModel
 
     [Required(ErrorMessage = "O campo strength é obrigatório.")]
     public int Strength { get; set; }
+
+    public string UserId { get; set; }
+    public virtual UserModel User { get; set; }
 }
 

@@ -15,5 +15,7 @@ public class ReadCharacterDto
     public string Description { get; set; }
 
     public int Strength { get; set; }
+
+    public string UserId { get; set; }
 }
 
