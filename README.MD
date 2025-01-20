@@ -4,6 +4,8 @@ Está aplicação tem como principal objetivo permitir o cadastro e busca de per
 
 ## Funcionalidades ✅
 
+- Login;
+- Criar conta;
 - Cadastro de personagem;
 - Editar personagem;
 - Buscar todos os personagens;
