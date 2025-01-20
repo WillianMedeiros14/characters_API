@@ -23,7 +23,7 @@ namespace characters_API.Services
 
             var token = new JwtSecurityToken
                 (
-                    expires: DateTime.Now.AddMinutes(10),
+                    expires: DateTime.Now.AddDays(30),
                     claims: claims,
                     signingCredentials: signingCredentials
                 );
